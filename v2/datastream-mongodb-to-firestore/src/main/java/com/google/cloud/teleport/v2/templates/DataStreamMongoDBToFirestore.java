@@ -29,7 +29,6 @@ import com.google.cloud.teleport.v2.cdc.dlq.PubSubNotifiedDlqIO;
 import com.google.cloud.teleport.v2.cdc.dlq.StringDeadLetterQueueSanitizer;
 import com.google.cloud.teleport.v2.coders.FailsafeElementCoder;
 import com.google.cloud.teleport.v2.common.UncaughtExceptionLogger;
-import com.google.cloud.teleport.v2.datastream.sources.DataStreamIO;
 import com.google.cloud.teleport.v2.templates.DataStreamMongoDBToFirestore.Options;
 import com.google.cloud.teleport.v2.templates.datastream.DatastreamConstants;
 import com.google.cloud.teleport.v2.templates.datastream.MongoDbChangeEventContext;
@@ -952,7 +951,7 @@ public class DataStreamMongoDBToFirestore {
       PCollection<FailsafeElement<String, String>> datastreamJsonRecords =
           pipeline.apply(
               "Read from GCS bucket",
-              new DataStreamIO(
+              new DatastreamPubSubAndGlobReader(
                       options.getStreamName(),
                       options.getInputFilePattern(),
                       options.getInputFileFormat(),
@@ -963,7 +962,7 @@ public class DataStreamMongoDBToFirestore {
                   .withDirectoryWatchDuration(
                       Duration.standardMinutes(options.getDirectoryWatchDurationInMinutes())));
       LOG.info(
-          "DataStreamIO configured with fileReadConcurrency: {}, directoryWatchDuration: {}"
+          "DatastreamPubSubAndGlobReader configured with fileReadConcurrency: {}, directoryWatchDuration: {}"
               + " minutes",
           options.getFileReadConcurrency(),
           options.getDirectoryWatchDurationInMinutes());
